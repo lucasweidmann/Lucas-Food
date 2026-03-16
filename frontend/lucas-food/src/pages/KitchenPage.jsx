@@ -10,7 +10,8 @@ const columns = [
 
 export default function KitchenPage() {
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loadingAction, setLoadingAction] = useState(false);
+  const [loadingPage, setLoadingPage] = useState(true);
 
   async function loadOrders() {
     try {
@@ -18,7 +19,10 @@ export default function KitchenPage() {
       setOrders(response.data);
     } catch (error) {
       console.error("Erro ao carregar pedidos:", error);
-      alert("Erro ao carregar pedidos");
+      alert(error.response?.data?.error || "Erro ao carregar pedidos");
+      setOrders([]);
+    } finally {
+      setLoadingPage(false);
     }
   }
 
@@ -47,13 +51,14 @@ export default function KitchenPage() {
 
   async function updateStatus(orderId, status) {
     try {
-      setLoading(true);
+      setLoadingAction(true);
       await api.patch(`/orders/${orderId}/status`, { status });
+      await loadOrders();
     } catch (error) {
       console.error("Erro ao atualizar status:", error);
-      alert("Erro ao atualizar status");
+      alert(error.response?.data?.error || "Erro ao atualizar status");
     } finally {
-      setLoading(false);
+      setLoadingAction(false);
     }
   }
 
@@ -78,101 +83,112 @@ export default function KitchenPage() {
         </button>
       </div>
 
-      <div style={styles.board}>
-        {columns.map((column) => (
-          <div key={column.key} style={styles.column}>
-            <h2 style={styles.columnTitle}>
-              {column.title} ({groupedOrders[column.key].length})
-            </h2>
+      {loadingPage ? (
+        <div style={styles.emptyPage}>Carregando...</div>
+      ) : (
+        <div style={styles.board}>
+          {columns.map((column) => (
+            <div key={column.key} style={styles.column}>
+              <h2 style={styles.columnTitle}>
+                {column.title} ({groupedOrders[column.key].length})
+              </h2>
 
-            <div style={styles.cards}>
-              {groupedOrders[column.key].length === 0 && (
-                <div style={styles.emptyCard}>Nenhum pedido</div>
-              )}
+              <div style={styles.cards}>
+                {groupedOrders[column.key].length === 0 && (
+                  <div style={styles.emptyCard}>Nenhum pedido</div>
+                )}
 
-              {groupedOrders[column.key].map((order) => (
-                <div key={order.id} style={styles.card}>
-                  <div style={styles.cardHeader}>
-                    <strong>Pedido #{order.id}</strong>
-                    <span>{order.customer_name || "Cliente balcão"}</span>
+                {groupedOrders[column.key].map((order) => (
+                  <div key={order.id} style={styles.card}>
+                    <div style={styles.cardHeader}>
+                      <strong>Pedido #{order.id}</strong>
+                      <span>{order.customer_name || "Cliente balcão"}</span>
+                    </div>
+
+                    <div style={styles.itemsList}>
+                      {order.order_items?.map((item) => (
+                        <div key={item.id} style={styles.itemRow}>
+                          <span>
+                            {item.quantity}x {item.products?.name || "Produto"}
+                          </span>
+
+                          {item.notes ? (
+                            <small style={styles.note}>Obs: {item.notes}</small>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div style={styles.total}>
+                      Total: R$ {Number(order.total).toFixed(2)}
+                    </div>
+
+                    <div style={styles.actions}>
+                      {order.status === "pendente" && (
+                        <button
+                          disabled={loadingAction}
+                          style={styles.actionButton}
+                          onClick={() => updateStatus(order.id, "preparando")}
+                        >
+                          Iniciar preparo
+                        </button>
+                      )}
+
+                      {order.status === "preparando" && (
+                        <button
+                          disabled={loadingAction}
+                          style={styles.actionButton}
+                          onClick={() => updateStatus(order.id, "pronto")}
+                        >
+                          Marcar como pronto
+                        </button>
+                      )}
+
+                      {order.status === "pronto" && (
+                        <button
+                          disabled={loadingAction}
+                          style={styles.actionButton}
+                          onClick={() => updateStatus(order.id, "entregue")}
+                        >
+                          Entregue
+                        </button>
+                      )}
+                    </div>
                   </div>
-
-                  <div style={styles.itemsList}>
-                    {order.order_items?.map((item) => (
-                      <div key={item.id} style={styles.itemRow}>
-                        <span>
-                          {item.quantity}x {item.products?.name || "Produto"}
-                        </span>
-
-                        {item.notes ? (
-                          <small style={styles.note}>Obs: {item.notes}</small>
-                        ) : null}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div style={styles.total}>
-                    Total: R$ {Number(order.total).toFixed(2)}
-                  </div>
-
-                  <div style={styles.actions}>
-                    {order.status === "pendente" && (
-                      <button
-                        disabled={loading}
-                        style={styles.actionButton}
-                        onClick={() => updateStatus(order.id, "preparando")}
-                      >
-                        Iniciar preparo
-                      </button>
-                    )}
-
-                    {order.status === "preparando" && (
-                      <button
-                        disabled={loading}
-                        style={styles.actionButton}
-                        onClick={() => updateStatus(order.id, "pronto")}
-                      >
-                        Marcar como pronto
-                      </button>
-                    )}
-
-                    {order.status === "pronto" && (
-                      <button
-                        disabled={loading}
-                        style={styles.actionButton}
-                        onClick={() => updateStatus(order.id, "entregue")}
-                      >
-                        Entregue
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 const styles = {
   page: {
-    minHeight: "100vh",
-    background: "#f4f4f5",
-    padding: 20,
+    display: "flex",
+    flexDirection: "column",
+    gap: 16,
   },
   header: {
+    background: "#fff",
+    borderRadius: 16,
+    padding: 20,
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    gap: 12,
+    flexWrap: "wrap",
   },
   refreshButton: {
     border: "none",
     padding: "10px 16px",
     borderRadius: 10,
     cursor: "pointer",
+    background: "#111827",
+    color: "#fff",
+    fontWeight: "bold",
   },
   board: {
     display: "grid",
@@ -198,6 +214,12 @@ const styles = {
     padding: 16,
     border: "1px dashed #ccc",
     borderRadius: 10,
+    textAlign: "center",
+  },
+  emptyPage: {
+    background: "#fff",
+    borderRadius: 16,
+    padding: 20,
     textAlign: "center",
   },
   card: {
@@ -240,5 +262,7 @@ const styles = {
     borderRadius: 10,
     cursor: "pointer",
     fontWeight: "bold",
+    background: "#111827",
+    color: "#fff",
   },
 };

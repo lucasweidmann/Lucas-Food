@@ -14,7 +14,7 @@ export default function PDVPage() {
       setProducts(response.data);
     } catch (error) {
       console.error("Erro ao carregar produtos:", error);
-      alert("Erro ao carregar produtos");
+      alert(error.response?.data?.error || "Erro ao carregar produtos");
     }
   }
 
@@ -117,7 +117,6 @@ export default function PDVPage() {
         items: cart.map((item) => ({
           product_id: item.product_id,
           quantity: item.quantity,
-          unit_price: item.unit_price,
           notes: item.notes,
         })),
       };
@@ -125,13 +124,12 @@ export default function PDVPage() {
       await api.post("/orders", payload);
 
       alert("Pedido criado com sucesso");
-
       setCart([]);
       setCustomerName("");
       setPaymentMethod("pix");
     } catch (error) {
       console.error("Erro ao finalizar pedido:", error);
-      alert("Erro ao finalizar pedido");
+      alert(error.response?.data?.error || "Erro ao finalizar pedido");
     } finally {
       setLoading(false);
     }
@@ -140,7 +138,7 @@ export default function PDVPage() {
   return (
     <div style={styles.container}>
       <div style={styles.leftPanel}>
-        <h1>PDV - Lucas Food</h1>
+        <h1 style={{ marginTop: 0 }}>PDV - Lucas Food</h1>
         <p>Selecione os produtos</p>
 
         <div style={styles.productGrid}>
@@ -159,7 +157,7 @@ export default function PDVPage() {
       </div>
 
       <div style={styles.rightPanel}>
-        <h2>Carrinho</h2>
+        <h2 style={{ marginTop: 0 }}>Carrinho</h2>
 
         <input
           type="text"
@@ -235,50 +233,49 @@ const styles = {
   container: {
     display: "grid",
     gridTemplateColumns: "2fr 1fr",
-    gap: "20px",
-    padding: "20px",
-    minHeight: "100vh",
-    backgroundColor: "#f5f5f5",
+    gap: 20,
   },
   leftPanel: {
     background: "#fff",
-    padding: "20px",
-    borderRadius: "12px",
+    padding: 20,
+    borderRadius: 16,
   },
   rightPanel: {
     background: "#fff",
-    padding: "20px",
-    borderRadius: "12px",
+    padding: 20,
+    borderRadius: 16,
     display: "flex",
     flexDirection: "column",
+    minHeight: 600,
   },
   productGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
-    gap: "12px",
-    marginTop: "20px",
+    gap: 12,
+    marginTop: 20,
   },
   productCard: {
     border: "1px solid #ddd",
-    borderRadius: "10px",
-    padding: "16px",
+    borderRadius: 10,
+    padding: 16,
     cursor: "pointer",
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
+    gap: 8,
     background: "#fafafa",
+    textAlign: "left",
   },
   input: {
     width: "100%",
-    padding: "10px",
-    marginBottom: "12px",
-    borderRadius: "8px",
+    padding: 10,
+    marginBottom: 12,
+    borderRadius: 8,
     border: "1px solid #ccc",
   },
   cartList: {
     flex: 1,
     overflowY: "auto",
-    marginTop: "10px",
+    marginTop: 10,
   },
   cartItem: {
     borderBottom: "1px solid #eee",
@@ -286,28 +283,31 @@ const styles = {
   },
   cartActions: {
     display: "flex",
-    gap: "8px",
+    gap: 8,
     alignItems: "center",
-    marginTop: "8px",
+    marginTop: 8,
+    flexWrap: "wrap",
   },
   notesInput: {
     width: "100%",
-    marginTop: "8px",
-    padding: "8px",
-    borderRadius: "8px",
+    marginTop: 8,
+    padding: 8,
+    borderRadius: 8,
     border: "1px solid #ccc",
   },
   footer: {
     borderTop: "1px solid #eee",
-    paddingTop: "16px",
-    marginTop: "16px",
+    paddingTop: 16,
+    marginTop: 16,
   },
   finalizeButton: {
     width: "100%",
-    padding: "14px",
+    padding: 14,
     border: "none",
-    borderRadius: "10px",
+    borderRadius: 10,
     cursor: "pointer",
     fontWeight: "bold",
+    background: "#111827",
+    color: "#fff",
   },
 };

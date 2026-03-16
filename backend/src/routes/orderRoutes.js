@@ -1,18 +1,17 @@
 import { Router } from "express";
-
 import {
   getOrders,
   createOrder,
   updateOrderStatus,
-  getOrdersByUser,
-  getOrdersByCustomer,
+  getMyOrders,
+  getOrderById,
 } from "../controllers/orderController.js";
 
 const router = Router();
 
+router.get("/my", getMyOrders);
+router.get("/:id", getOrderById);
 router.get("/", getOrders);
-router.get("/user/:userId", getOrdersByUser);
-router.get("/customer/:customerName", getOrdersByCustomer);
 router.post("/", createOrder);
 router.patch("/:id/status", updateOrderStatus);
 

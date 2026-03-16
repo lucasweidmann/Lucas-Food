@@ -19,35 +19,61 @@ function AppLayout() {
   }
 
   return (
-    <div style={{ padding: 20 }}>
+    <div style={{ minHeight: "100vh", background: "#f4f4f5" }}>
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 20,
+          maxWidth: 1280,
+          margin: "0 auto",
+          padding: 20,
         }}
       >
-        <nav style={{ display: "flex", gap: 12 }}>
-          <Link to="/products">Produtos</Link>
-          <Link to="/orders">Pedidos</Link>
-          <Link to="/pdv">PDV</Link>
-          <Link to="/kitchen">Cozinha</Link>
-        </nav>
+        <div
+          style={{
+            background: "#fff",
+            borderRadius: 16,
+            padding: 16,
+            marginBottom: 20,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 16,
+            flexWrap: "wrap",
+          }}
+        >
+          <nav
+            style={{
+              display: "flex",
+              gap: 12,
+              flexWrap: "wrap",
+            }}
+          >
+            <Link to="/pdv">PDV</Link>
+            <Link to="/orders">Meus pedidos</Link>
+            <Link to="/products">Produtos</Link>
+            <Link to="/kitchen">Cozinha</Link>
+          </nav>
 
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <span>{user?.email}</span>
-          <button onClick={handleLogout}>Sair</button>
+          <div
+            style={{
+              display: "flex",
+              gap: 12,
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            <span>{user?.email}</span>
+            <button onClick={handleLogout}>Sair</button>
+          </div>
         </div>
-      </div>
 
-      <Routes>
-        <Route path="/products" element={<ProductsPage />} />
-        <Route path="/orders" element={<OrdersPage />} />
-        <Route path="/pdv" element={<PDVPage />} />
-        <Route path="/kitchen" element={<KitchenPage />} />
-        <Route path="*" element={<Navigate to="/pdv" replace />} />
-      </Routes>
+        <Routes>
+          <Route path="/pdv" element={<PDVPage />} />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/kitchen" element={<KitchenPage />} />
+          <Route path="*" element={<Navigate to="/pdv" replace />} />
+        </Routes>
+      </div>
     </div>
   );
 }
