@@ -56,12 +56,11 @@ export default function CartPage() {
       setLoading(true);
 
       await api.post("/orders", {
-        customer_name: customerName || "Cliente app",
-        payment_method: paymentMethod,
+        customer_name: customerName?.trim() || "Cliente app",
+        payment_method: paymentMethod.trim().toLowerCase(),
         items: cart.map((item) => ({
           product_id: item.product_id,
           quantity: item.quantity,
-          unit_price: item.unit_price,
           notes: "",
         })),
       });
@@ -69,7 +68,11 @@ export default function CartPage() {
       Alert.alert("Sucesso", "Pedido criado com sucesso");
       router.replace("/orders");
     } catch (error) {
-      Alert.alert("Erro", "Não foi possível finalizar o pedido");
+      console.log("Erro ao finalizar pedido:", error?.response?.data || error);
+      Alert.alert(
+        "Erro",
+        error?.response?.data?.error || "Não foi possível finalizar o pedido",
+      );
     } finally {
       setLoading(false);
     }
@@ -93,6 +96,7 @@ export default function CartPage() {
         value={paymentMethod}
         onChangeText={setPaymentMethod}
         style={styles.input}
+        autoCapitalize="none"
       />
 
       <FlatList

@@ -19,12 +19,10 @@ export default function OrdersPage() {
 
   async function loadOrders() {
     try {
-      if (!user?.id) return;
-
-      const response = await api.get(`/orders/user/${user.id}`);
+      const response = await api.get("/orders/my");
       setOrders(response.data);
     } catch (error) {
-      console.log("Erro ao carregar pedidos", error);
+      console.log("Erro ao carregar pedidos", error?.response?.data || error);
       setOrders([]);
     } finally {
       setLoading(false);
